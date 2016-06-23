@@ -1,5 +1,3 @@
-%global debug_package %{nil}
-
 # buildforkernels macro hint: when you build a new version or a new release
 # that contains bugfixes or other improvements then you must disable the
 # "buildforkernels newest" macro for just that build; immediately after
@@ -7,20 +5,33 @@
 # a new akmod package will only get build when a new one is actually needed
 %define buildforkernels akmod
 
+%global debug_package %{nil}
+
+%global zipmodules 1
+
+%define __spec_install_post \
+  %{__arch_install_post}\
+  %{__os_install_post}\
+  %{__mod_compress_install_post}
+
+%define __mod_compress_install_post \
+  if [ "%{zipmodules}" -eq "1" ] && [ $kernel_version ]; then \
+    find %{buildroot}/usr/lib/modules/ -type f -name '*.ko' | xargs xz; \
+  fi
+
 %bcond_with _nv_build_module_instances
 
 Name:           nvidia-kmod
 Version:        340.96
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64 armv7hl
+ExclusiveArch:  %{ix86} x86_64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
-Source2:        %{name}-%{version}-armv7hl.tar.xz
 Source11:       nvidia-kmodtool-excludekernel-filterfile
 
 Conflicts:      nvidia-multi-kmod
@@ -46,10 +57,6 @@ kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --filterf
 
 %ifarch x86_64
 %setup -q -b 1 -n %{name}-%{version}-x86_64
-%endif
-
-%ifarch armv7hl
-%setup -q -b 2 -n %{name}-%{version}-armv7hl
 %endif
 
 for kernel_version in %{?kernel_versions}; do
@@ -102,6 +109,10 @@ done
 %{?akmod_install}
 
 %changelog
+* Thu Jun 23 2016 Simone Caronni <negativo17@gmail.com> - 2:340.96-2
+- Compress modules with xz as all other kernel modules.
+- Remove ARM (Carma, Kayla) support.
+
 * Tue Nov 17 2015 Simone Caronni <negativo17@gmail.com> - 2:340.96-1
 - Update to 340.96.
 
