@@ -4,28 +4,27 @@
 # If kversion isn't defined on the rpmbuild line, define it here. For Fedora,
 # kversion needs always to be defined as there is no kABI support.
 
-# RHEL 6.5
+# RHEL 6.8
 %if 0%{?rhel} == 6
-%{!?kversion: %global kversion 2.6.32-573.el6.%{_target_cpu}}
+%{!?kversion: %global kversion 2.6.32-642.el6.%{_target_cpu}}
 %endif
 
-# RHEL 7.1
+# RHEL 7.2
 %if 0%{?rhel} == 7
-%{!?kversion: %global kversion 3.10.0-229.el7.%{_target_cpu}}
+%{!?kversion: %global kversion 3.10.0-327.el7.%{_target_cpu}}
 %endif
 
 Name:           %{kmod_name}-kmod
 Version:        340.96
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
 URL:            http://www.nvidia.com/
-ExclusiveArch:  %{ix86} x86_64 armv7hl
+ExclusiveArch:  %{ix86} x86_64
 
 Source0:        %{kmod_name}-kmod-%{version}-i386.tar.xz
 Source1:        %{kmod_name}-kmod-%{version}-x86_64.tar.xz
-Source2:        %{kmod_name}-kmod-%{version}-armv7hl.tar.xz
 Source10:       kmodtool-%{kmod_name}-el6.sh
 
 BuildRequires:  redhat-rpm-config
@@ -60,10 +59,6 @@ the same variant of the Linux kernel and not on any one specific build.
 %setup -q -T -b 1 -n %{kmod_name}-kmod-%{version}-x86_64
 %endif
 
-%ifarch armv7hl
-%setup -q -T -b 2 -n %{kmod_name}-kmod-%{version}-armv7hl
-%endif
-
 mv kernel/* .
 
 echo "override %{kmod_name} * weak-updates/%{kmod_name}" > kmod-%{kmod_name}.conf
@@ -90,6 +85,9 @@ install kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 rm -f %{buildroot}/lib/modules/%{kversion}/modules.*
 
 %changelog
+* Thu Jun 23 2016 Simone Caronni <negativo17@gmail.com> - 2:340.96-2
+- Remove ARM (Carma, Kayla) support.
+
 * Tue Nov 17 2015 Simone Caronni <negativo17@gmail.com> - 2:340.96-1
 - Update to 340.96.
 
