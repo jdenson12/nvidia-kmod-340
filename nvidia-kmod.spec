@@ -15,8 +15,8 @@
 %endif
 
 Name:           %{kmod_name}-kmod
-Version:        340.96
-Release:        2%{?dist}
+Version:        340.98
+Release:        1%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
@@ -85,6 +85,9 @@ install kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 rm -f %{buildroot}/lib/modules/%{kversion}/modules.*
 
 %changelog
+* Sun Oct 02 2016 Simone Caronni <negativo17@gmail.com> - 2:340.98-1
+- Update to 340.98.
+
 * Thu Jun 23 2016 Simone Caronni <negativo17@gmail.com> - 2:340.96-2
 - Remove ARM (Carma, Kayla) support.
 
