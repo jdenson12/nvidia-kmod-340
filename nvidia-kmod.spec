@@ -15,8 +15,8 @@
 %endif
 
 Name:           %{kmod_name}-kmod
-Version:        340.101
-Release:        2%{?dist}
+Version:        340.102
+Release:        1%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
@@ -27,7 +27,7 @@ Source0:        %{kmod_name}-kmod-%{version}-i386.tar.xz
 Source1:        %{kmod_name}-kmod-%{version}-x86_64.tar.xz
 Source10:       kmodtool-%{kmod_name}-el6.sh
 
-Patch0:         kernel-4.9.patch
+Patch0:         kernel_4.10.patch
 
 BuildRequires:  redhat-rpm-config
 BuildRequires:  kernel-abi-whitelists
@@ -89,6 +89,10 @@ install kmod-%{kmod_name}.conf %{buildroot}%{_sysconfdir}/depmod.d/
 rm -f %{buildroot}/lib/modules/%{kversion}/modules.*
 
 %changelog
+* Thu Feb 23 2017 Simone Caronni <negativo17@gmail.com> - 2:340.102-1
+- Udpate to 340.102.
+- Add kernel 4.10 patch.
+
 * Mon Jan 16 2017 Simone Caronni <negativo17@gmail.com> - 2:340.101-2
 - Add kernel 4.9 patch.
 
