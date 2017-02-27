@@ -23,7 +23,7 @@
 
 Name:           nvidia-kmod
 Version:        340.102
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
@@ -113,6 +113,9 @@ done
 %{?akmod_install}
 
 %changelog
+* Mon Feb 27 2017 Simone Caronni <negativo17@gmail.com> - 2:340.102-2
+- Update kernel 4.10 patch.
+
 * Thu Feb 23 2017 Simone Caronni <negativo17@gmail.com> - 2:340.102-1
 - Update to 340.102.
 - Add kernel 4.10 patch.
