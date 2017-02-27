@@ -1,19 +1,22 @@
-From 983a2ca221a371e08bb5ad11758a729cfa5aa88c Mon Sep 17 00:00:00 2001
-From: Alberto Milone <alberto.milone@canonical.com>
-Date: Wed, 15 Feb 2017 17:05:55 +0100
-Subject: [PATCH 1/1] Add support for Linux 4.10
-
----
- nv-linux.h            |  7 +++++++
- nv-pat.c              | 40 ++++++++++++++++++++++++++++++++++++++++
- uvm/nvidia_uvm_lite.c |  4 ++++
- 3 files changed, 51 insertions(+)
-
-diff --git a/kernel/nv-linux.h b/kernel/nv-linux.h
-index e7068e3..2d62492 100644
---- a/kernel/nv-linux.h
-+++ b/kernel/nv-linux.h
-@@ -2082,6 +2082,8 @@ static inline NvU64 nv_node_end_pfn(int nid)
+diff -Naur nvidia-kmod-340.102-x86_64.old/kernel/nv-drm.c nvidia-kmod-340.102-x86_64/kernel/nv-drm.c
+--- nvidia-kmod-340.102-x86_64.old/kernel/nv-drm.c	2017-01-16 21:15:32.000000000 +0100
++++ nvidia-kmod-340.102-x86_64/kernel/nv-drm.c	2017-02-27 11:10:00.115262875 +0100
+@@ -115,7 +115,11 @@
+ };
+ 
+ static struct drm_driver nv_drm_driver = {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
++    .driver_features = DRIVER_GEM | DRIVER_PRIME | DRIVER_LEGACY,
++#else
+     .driver_features = DRIVER_GEM | DRIVER_PRIME,
++#endif
+     .load = nv_drm_load,
+     .unload = nv_drm_unload,
+     .fops = &nv_drm_fops,
+diff -Naur nvidia-kmod-340.102-x86_64.old/kernel/nv-linux.h nvidia-kmod-340.102-x86_64/kernel/nv-linux.h
+--- nvidia-kmod-340.102-x86_64.old/kernel/nv-linux.h	2017-01-16 21:15:32.000000000 +0100
++++ nvidia-kmod-340.102-x86_64/kernel/nv-linux.h	2017-02-27 11:08:42.824641096 +0100
+@@ -2082,6 +2082,8 @@
   *    2016 Dec 14:5b56d49fc31dbb0487e14ead790fc81ca9fb2c99
   */
  
@@ -22,7 +25,7 @@ index e7068e3..2d62492 100644
  #if defined(NV_GET_USER_PAGES_REMOTE_PRESENT)
      #if defined(NV_GET_USER_PAGES_HAS_WRITE_AND_FORCE_ARGS)
          #define NV_GET_USER_PAGES           get_user_pages
-@@ -2129,8 +2131,13 @@ static inline NvU64 nv_node_end_pfn(int nid)
+@@ -2129,8 +2131,13 @@
  
          #else
  
@@ -36,11 +39,10 @@ index e7068e3..2d62492 100644
  
          #endif
  
-diff --git a/kernel/nv-pat.c b/kernel/nv-pat.c
-index a725533..cec6f3f 100644
---- a/kernel/nv-pat.c
-+++ b/kernel/nv-pat.c
-@@ -203,6 +203,7 @@ void nv_disable_pat_support(void)
+diff -Naur nvidia-kmod-340.102-x86_64.old/kernel/nv-pat.c nvidia-kmod-340.102-x86_64/kernel/nv-pat.c
+--- nvidia-kmod-340.102-x86_64.old/kernel/nv-pat.c	2017-01-16 21:15:32.000000000 +0100
++++ nvidia-kmod-340.102-x86_64/kernel/nv-pat.c	2017-02-27 11:08:42.825641117 +0100
+@@ -203,6 +203,7 @@
  }
  
  #if defined(NV_ENABLE_PAT_SUPPORT) && defined(NV_ENABLE_HOTPLUG_CPU)
@@ -48,7 +50,7 @@ index a725533..cec6f3f 100644
  static int
  nvidia_cpu_callback(struct notifier_block *nfb, unsigned long action, void *hcpu)
  {
-@@ -234,6 +235,34 @@ static struct notifier_block nv_hotcpu_nfb = {
+@@ -234,6 +235,34 @@
      .notifier_call = nvidia_cpu_callback,
      .priority = 0
  };
@@ -83,7 +85,7 @@ index a725533..cec6f3f 100644
  #endif
  
  int nv_init_pat_support(nv_stack_t *sp)
-@@ -255,7 +284,14 @@ int nv_init_pat_support(nv_stack_t *sp)
+@@ -255,7 +284,14 @@
  #if defined(NV_ENABLE_PAT_SUPPORT) && defined(NV_ENABLE_HOTPLUG_CPU)
          if (nv_pat_mode == NV_PAT_MODE_BUILTIN)
          {
@@ -98,7 +100,7 @@ index a725533..cec6f3f 100644
              {
                  nv_disable_pat_support();
                  nv_printf(NV_DBG_ERRORS,
-@@ -280,7 +316,11 @@ void nv_teardown_pat_support(void)
+@@ -280,7 +316,11 @@
      {
          nv_disable_pat_support();
  #if defined(NV_ENABLE_PAT_SUPPORT) && defined(NV_ENABLE_HOTPLUG_CPU)
@@ -110,11 +112,10 @@ index a725533..cec6f3f 100644
  #endif
      }
  }
-diff --git a/kernel/uvm/nvidia_uvm_lite.c b/kernel/uvm/nvidia_uvm_lite.c
-index 9627f60..2158b45 100644
---- a/kernel/uvm/nvidia_uvm_lite.c
-+++ b/kernel/uvm/nvidia_uvm_lite.c
-@@ -820,7 +820,11 @@ done:
+diff -Naur nvidia-kmod-340.102-x86_64.old/kernel/uvm/nvidia_uvm_lite.c nvidia-kmod-340.102-x86_64/kernel/uvm/nvidia_uvm_lite.c
+--- nvidia-kmod-340.102-x86_64.old/kernel/uvm/nvidia_uvm_lite.c	2017-01-16 21:15:32.000000000 +0100
++++ nvidia-kmod-340.102-x86_64/kernel/uvm/nvidia_uvm_lite.c	2017-02-27 11:08:42.827641159 +0100
+@@ -820,7 +820,11 @@
  #if defined(NV_VM_OPERATIONS_STRUCT_HAS_FAULT)
  int _fault(struct vm_area_struct *vma, struct vm_fault *vmf)
  {
@@ -126,6 +127,3 @@ index 9627f60..2158b45 100644
      struct page *page = NULL;
      int retval;
  
--- 
-2.7.4
-
