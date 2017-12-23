@@ -22,8 +22,8 @@
 %bcond_with _nv_build_module_instances
 
 Name:           nvidia-kmod
-Version:        340.102
-Release:        2%{?dist}
+Version:        340.104
+Release:        1%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
@@ -34,7 +34,8 @@ Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
 Source11:       nvidia-kmodtool-excludekernel-filterfile
 
-Patch0:         kernel_4.10.patch
+Patch0:         kernel_4.11.patch
+Patch1:         kernel_4.14.patch
 
 Conflicts:      nvidia-multi-kmod
 
@@ -113,6 +114,12 @@ done
 %{?akmod_install}
 
 %changelog
+* Fri Dec 22 2017 Jemma Denson <jdenson@gmail.com> - 2:340.104-1
+- Update to 340.104.
+- Remove 4.10 patch.
+- Add kernel 4.11 patch.
+- Add kernel 4.14 patch.
+
 * Mon Feb 27 2017 Simone Caronni <negativo17@gmail.com> - 2:340.102-2
 - Update kernel 4.10 patch.
 

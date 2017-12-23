@@ -1,0 +1,27 @@
+diff -up NVIDIA-Linux-x86_64-340.104/kernel/nv-drm.c.4.14 NVIDIA-Linux-x86_64-340.104/kernel/nv-drm.c
+--- NVIDIA-Linux-x86_64-340.104/kernel/nv-drm.c.4.14	2017-12-22 20:24:01.210740465 +0000
++++ NVIDIA-Linux-x86_64-340.104/kernel/nv-drm.c	2017-12-22 20:26:27.532346408 +0000
+@@ -173,7 +173,11 @@ int __init nv_drm_init(
+ {
+     int ret = 0;
+ #if defined(NV_DRM_AVAILABLE)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+     ret = drm_pci_init(&nv_drm_driver, pci_driver);
++#else
++    ret = drm_legacy_pci_init(&nv_drm_driver, pci_driver);
++#endif
+ #endif
+     return ret;
+ }
+@@ -183,7 +187,11 @@ void nv_drm_exit(
+ )
+ {
+ #if defined(NV_DRM_AVAILABLE)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+     drm_pci_exit(&nv_drm_driver, pci_driver);
++#else
++    drm_legacy_pci_exit(&nv_drm_driver, pci_driver);
++#endif
+ #endif
+ }
+ 
