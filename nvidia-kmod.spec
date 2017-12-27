@@ -19,16 +19,14 @@
     find %{buildroot}/usr/lib/modules/ -type f -name '*.ko' | xargs xz; \
   fi
 
-%bcond_with _nv_build_module_instances
-
 Name:           nvidia-kmod
 Version:        340.104
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
 URL:            http://www.nvidia.com/object/unix.html
-ExclusiveArch:  %{ix86} x86_64
+ExclusiveArch:  i686 x86_64
 
 Source0:        %{name}-%{version}-i386.tar.xz
 Source1:        %{name}-%{version}-x86_64.tar.xz
@@ -37,11 +35,9 @@ Source11:       nvidia-kmodtool-excludekernel-filterfile
 Patch0:         kernel_4.11.patch
 Patch1:         kernel_4.14.patch
 
-Conflicts:      nvidia-multi-kmod
-
 # get the needed BuildRequires (in parts depending on what we build for)
-BuildRequires:  %{_bindir}/kmodtool
-%{!?kernels:BuildRequires: buildsys-build-rpmfusion-kerneldevpkgs-%{?buildforkernels:%{buildforkernels}}%{!?buildforkernels:current}-%{_target_cpu} }
+BuildRequires:  kmodtool
+
 # kmodtool does its magic here
 %{expand:%(kmodtool --target %{_target_cpu} --repo rpmfusion --kmodname %{name} --filterfile %{SOURCE11} --obsolete-name nvidia-newest --obsolete-version "%{version}" %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
 
@@ -59,7 +55,7 @@ kmodtool  --target %{_target_cpu}  --repo rpmfusion --kmodname %{name} --filterf
 %endif
 
 %ifarch x86_64
-%setup -q -b 1 -n %{name}-%{version}-x86_64
+%setup -q -T -b 1 -n %{name}-%{version}-x86_64
 %endif
 
 %patch0 -p1
@@ -71,49 +67,31 @@ done
 
 %build
 for kernel_version in %{?kernel_versions}; do
-%if !0%{?_nv_build_module_instances}
     pushd _kmod_build_${kernel_version%%___*}/
         make %{?_smp_mflags} \
             IGNORE_XEN_PRESENCE=1 \
             IGNORE_PREEMPT_RT_PRESENCE=1 \
+            IGNORE_CC_MISMATCH=1 \
             SYSSRC="${kernel_version##*___}" \
             module
     popd
-    pushd _kmod_build_${kernel_version%%___*}/uvm
-        make %{?_smp_mflags} \
-            IGNORE_XEN_PRESENCE=1 \
-            IGNORE_PREEMPT_RT_PRESENCE=1 \
-            SYSSRC="${kernel_version##*___}" \
-            module
-    popd
-%else
-    pushd _kmod_build_${kernel_version%%___*}/
-        make \
-            IGNORE_XEN_PRESENCE=1 \
-            IGNORE_PREEMPT_RT_PRESENCE=1 \
-            SYSSRC="${kernel_version##*___}" \
-            NV_BUILD_MODULE_INSTANCES=%{?_nv_build_module_instances} \
-            module
-    popd
-%endif
 done
 
 %install
 for kernel_version in %{?kernel_versions}; do
     mkdir -p %{buildroot}/%{kmodinstdir_prefix}/${kernel_version%%___*}/%{kmodinstdir_postfix}/
-%if !0%{?_nv_build_module_instances}
-    install -p -m 0755 \
-        _kmod_build_${kernel_version%%___*}/nvidia.ko \
-        _kmod_build_${kernel_version%%___*}/uvm/nvidia-uvm.ko \
+    install -p -m 0755 _kmod_build_${kernel_version%%___*}/*.ko \
         %{buildroot}/%{kmodinstdir_prefix}/${kernel_version%%___*}/%{kmodinstdir_postfix}/
-%else
-    install -p -m 0755 _kmod_build_${kernel_version%%___*}/uvm/nvidia*.ko \
-        %{buildroot}/%{kmodinstdir_prefix}/${kernel_version%%___*}/%{kmodinstdir_postfix}/
-%endif
 done
 %{?akmod_install}
 
 %changelog
+* Sat Dec 23 2017 Jemma Denson <jdenson@gmail.com> - 2:340.104-2
+- Merge in negativo17 to date:
+- Ignore mismatching GCC version when compiling, useful when the distribution is
+  not yet released and compilers are being updated.
+- Instantiated modules are long gone. kmodtool is part of Fedora.
+
 * Fri Dec 22 2017 Jemma Denson <jdenson@gmail.com> - 2:340.104-1
 - Update to 340.104.
 - Remove 4.10 patch.
