@@ -20,8 +20,8 @@
   fi
 
 Name:           nvidia-kmod
-Version:        340.104
-Release:        2%{?dist}
+Version:        340.107
+Release:        1%{?dist}
 Summary:        NVIDIA display driver kernel module
 Epoch:          2
 License:        NVIDIA License
@@ -33,7 +33,6 @@ Source1:        %{name}-%{version}-x86_64.tar.xz
 Source11:       nvidia-kmodtool-excludekernel-filterfile
 
 Patch0:         kernel_4.11.patch
-Patch1:         kernel_4.14.patch
 
 # get the needed BuildRequires (in parts depending on what we build for)
 BuildRequires:  kmodtool
@@ -86,6 +85,10 @@ done
 %{?akmod_install}
 
 %changelog
+* Sun Aug 12 2018 Jemma Denson <jdenson@gmail.com> - 2:340.107-1
+- Update to 340.107
+- Remove kernel 4.14 patch.
+
 * Sat Dec 23 2017 Jemma Denson <jdenson@gmail.com> - 2:340.104-2
 - Merge in negativo17 to date:
 - Ignore mismatching GCC version when compiling, useful when the distribution is
